@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="it" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LMCraft1 Sanctions Log</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkbg: '#0D0D0D',
+                        darkcard: '#161619',
+                        darkborder: '#2A2A30',
+                        accentpurple: '#8B5CF6',
+                        accentpurplehover: '#7C3AED',
+                        minecraftred: '#EF4444',
+                        minecraftorange: '#F97316',
+                        minecraftyellow: '#EAB308',
+                    },
+                    fontFamily: {
+                        pixel: ['"Press Start 2P"', 'monospace'],
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts: Press Start 2P & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #0D0D0D;
+            background-image: 
+                linear-gradient(30deg, #121215 12%, transparent 12.5%, transparent 87%, #121215 87.5%, #121215),
+                linear-gradient(150deg, #121215 12%, transparent 12.5%, transparent 87%, #121215 87.5%, #121215),
+                linear-gradient(30deg, #121215 12%, transparent 12.5%, transparent 87%, #121215 87.5%, #121215),
+                linear-gradient(150deg, #121215 12%, transparent 12.5%, transparent 87%, #121215 87.5%, #121215),
+                linear-gradient(60deg, #0f0f12 25%, transparent 25.5%, transparent 75%, #0f0f12 75.5%, #0f0f12);
+            background-size: 40px 70px;
+            background-position: 0 0, 0 0, 20px 35px, 20px 35px, 0 0;
+            color: #E5E7EB;
+            font-family: 'Inter', sans-serif;
+        }
+        .pixel-font {
+            font-family: 'Press Start 2P', monospace;
+            letter-spacing: -0.5px;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0D0D0D;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2A2A30;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #8B5CF6;
+        }
+        .minecraft-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-purple-500 selection:text-white">
+
+    <!-- HEADER NAVBAR -->
+    <header class="w-full bg-[#121215]/90 border-b border-[#2A2A30] backdrop-blur sticky top-0 z-40 px-4 sm:px-8 py-3 flex items-center justify-between">
+        <div class="flex items-center space-x-3 cursor-pointer" onclick="app.goHome()">
+            <div class="w-9 h-9 bg-purple-600 rounded-lg flex items-center justify-center minecraft-shadow border border-purple-400">
+                <i class="fa-solid fa-gavel text-white text-sm"></i>
+            </div>
+            <div>
+                <h1 class="pixel-font text-xs sm:text-sm text-purple-400 tracking-wider">LMCRAFT1 LOGS</h1>
+                <p class="text-[10px] text-gray-400">Official Sanctions Database</p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+            <div id="adminStatusBadge" class="hidden items-center space-x-2 bg-emerald-950/60 border border-emerald-600/50 px-3 py-1 rounded-full text-xs text-emerald-400">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span id="adminNameDisplay" class="font-semibold">Admin Mode</span>
+            </div>
+            <button id="adminNavBtn" onclick="app.toggleAdminModal()" class="flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white px-3.5 py-2 rounded-lg text-xs font-medium transition-all shadow-lg shadow-purple-600/20 active:scale-95">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span class="hidden sm:inline">Dashboard Admin</span>
+            </button>
+            <button id="adminLogoutBtn" onclick="app.adminLogout()" class="hidden bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-500/30 p-2 rounded-lg text-xs transition-all" title="Logout">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="flex-grow container mx-auto px-4 sm:px-6 py-6 max-w-6xl">
+        <div id="appView">
+            <!-- Injected dynamically via JavaScript -->
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="w-full bg-[#121215]/80 border-t border-[#2A2A30] py-4 text-center text-xs text-gray-500">
+        <p>LMCraft1 Network &copy; 2026. Tutti i diritti riservati. Sistema di logging sanzioni anti-cheat v2.4</p>
+    </footer>
+
+    <!-- MODAL: SECURE ADMIN LOGIN -->
+    <div id="adminLoginModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-[#161619] border border-[#2A2A30] rounded-2xl w-full max-w-md p-6 minecraft-shadow relative">
+            <button onclick="app.closeModals()" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="flex items-center space-x-3 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-purple-400">
+                    <i class="fa-solid fa-lock text-lg"></i>
+                </div>
+                <div>
+                    <h3 class="pixel-font text-xs text-white">ACCESSO STAFF</h3>
+                    <p class="text-xs text-gray-400">Inserisci la password amministrativa</p>
+                </div>
+            </div>
+            <form onsubmit="app.handleAdminLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1.5">Password di Sicurezza</label>
+                    <input type="password" id="adminPasswordInput" placeholder="••••••••" required autocomplete="current-password"
+                        class="w-full bg-[#0D0D0D] border border-[#2A2A30] rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500 transition-colors">
+                </div>
+                <div id="loginErrorMsg" class="text-xs text-red-400 hidden"></div>
+                <div class="flex space-x-3 pt-2">
+                    <button type="button" onclick="app.closeModals()" class="flex-1 bg-[#2A2A30] hover:bg-[#35353d] text-gray-300 py-2.5 rounded-xl text-xs font-medium transition-colors">Annulla</button>
+                    <button type="submit" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-xl text-xs font-semibold transition-colors shadow-lg shadow-purple-600/20">Autenticati</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: ADD SANCTION -->
+    <div id="addSanctionModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-[#161619] border border-[#2A2A30] rounded-2xl w-full max-w-lg p-6 minecraft-shadow relative max-h-[90vh] overflow-y-auto">
+            <button onclick="app.closeModals()" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="flex items-center space-x-3 mb-6">
+                <div class="w-10 h-10 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-purple-400">
+                    <i class="fa-solid fa-user-plus text-lg"></i>
+                </div>
+                <div>
+                    <h3 class="pixel-font text-xs text-white">AGGIUNGI SANZIONE</h3>
+                    <p class="text-xs text-gray-400">Registra un nuovo provvedimento disciplinare per LMCraft1</p>
+                </div>
+            </div>
+            <form onsubmit="app.handleAddSanction(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Nome Giocatore</label>
+                    <input type="text" id="newPlayerName" placeholder="Es. Notch, Steve, nimon" required
+                        class="w-full bg-[#0D0D0D] border border-[#2A2A30] rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500 transition-colors">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-300 mb-1">Tipo di Sanzione</label>
+                        <select id="newSanctionType" onchange="app.onSanctionTypeChange()"
+                            class="w-full bg-[#0D0D0D] border border-[#2A2A30] rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500 transition-colors">
+                            <option value="BAN">BAN (Blocco Account)</option>
+                            <option value="MUTE">MUTE (Silenziamento Chat)</option>
+                            <option value="WARN">WARN (Avvertimento)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-300 mb-1">Durata</label>
+                        <input type="text" id="newDuration" placeholder="Es. Permanent o 7 days" required
+                            class="w-full bg-[#0D0D0D] border border-[#2A2A30] rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500 transition-colors">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-300 mb-1">Lobby di Provenienza</label>
+                        <!-- Lobby fixed exclusively to SMP -->
+                        <select id="newLobby" disabled
+                            class="w-full bg-[#0D0D0D] border border-[#2A2A30] rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500 transition-colors cursor-not-allowed opacity-80">
+                            <option value="SMP" selected>SMP</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-300 mb-1">Staffer</label>
+                        <input type="text" id="newStaffer" value="AdminMaster" required
+                            class="w-full bg-[#0D0D0D] border border-[#2A2A30] rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500 transition-colors">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Motivazione (Reason)</label>
+                    <textarea id="newReason" rows="3" placeholder="Es. Cheating (Killaura / Reach), X-Ray, Spam..." required
+                        class="w-full bg-[#0D0D0D] border border-[#2A2A30] rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500 transition-colors resize-none"></textarea>
+                </div>
+                <div class="flex space-x-3 pt-2">
+                    <button type="button" onclick="app.closeModals()" class="flex-1 bg-[#2A2A30] hover:bg-[#35353d] text-gray-300 py-2.5 rounded-xl text-xs font-medium transition-colors">Annulla</button>
+                    <button type="submit" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-xl text-xs font-semibold transition-colors shadow-lg shadow-purple-600/20">Salva Sanzione</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: REVOKE / DELETE SANCTION -->
+    <div id="revokeSanctionModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-[#161619] border border-[#2A2A30] rounded-2xl w-full max-w-md p-6 minecraft-shadow relative">
+            <button onclick="app.closeModals()" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="flex items-center space-x-3 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-red-600/20 border border-red-500/30 flex items-center justify-center text-red-400">
+                    <i class="fa-solid fa-trash-can text-lg"></i>
+                </div>
+                <div>
+                    <h3 class="pixel-font text-xs text-white">REVOCA SANZIONE</h3>
+                    <p class="text-xs text-gray-400">Elimina un provvedimento attivo dal database</p>
+                </div>
+            </div>
+            <form onsubmit="app.handleRevokeSanction(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Seleziona Sanzione Attiva</label>
+                    <select id="revokeSanctionSelect" required
+                        class="w-full bg-[#0D0D0D] border border-[#2A2A30] rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-red-500 transition-colors">
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Motivazione Revoca (Obbligatoria)</label>
+                    <input type="text" id="revokeReason" placeholder="Es. Errore, Ricorso Accettato" required
+                        class="w-full bg-[#0D0D0D] border border-[#2A2A30] rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-red-500 transition-colors">
+                </div>
+                <div class="flex space-x-3 pt-2">
+                    <button type="button" onclick="app.closeModals()" class="flex-1 bg-[#2A2A30] hover:bg-[#35353d] text-gray-300 py-2.5 rounded-xl text-xs font-medium transition-colors">Annulla</button>
+                    <button type="submit" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2.5 rounded-xl text-xs font-semibold transition-colors shadow-lg shadow-red-600/20">Conferma Rimozione</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- NOTIFICATION TOAST -->
+    <div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+    <!-- APPLICATION LOGIC -->
+    <script>
+        class SanctionsApp {
+            constructor() {
+                // Initialize with empty array as default, or load existing from localStorage
+                this.sanctions = JSON.parse(localStorage.getItem('lmcraft1_sanctions')) || [];
+                this.currentView = 'home';
+                this.selectedPlayerName = null;
+                this.activeFilter = 'ALL';
+                this.searchQuery = '';
+                this.isAdminLoggedIn = sessionStorage.getItem('lmcraft1_is_admin') === 'true';
+                this.adminName = sessionStorage.getItem('lmcraft1_admin_name') || 'AdminMaster';
+            }
+
+            saveData() {
+                localStorage.setItem('lmcraft1_sanctions', JSON.stringify(this.sanctions));
+            }
+
+            showToast(message, type = 'success') {
+                const container = document.getElementById('toastContainer');
+                const toast = document.createElement('div');
+                const bgColor = type === 'success' ? 'bg-emerald-600 border-emerald-500' : 'bg-red-600 border-red-500';
+                toast.className = `${bgColor} text-white px-4 py-3 rounded-xl text-xs font-medium shadow-2xl border flex items-center space-x-3 pointer-events-auto animate-in slide-in-from-bottom-5 duration-300`;
+                toast.innerHTML = `
+                    <i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation'} text-base"></i>
+                    <span>${message}</span>
+                `;
+                container.appendChild(toast);
+                setTimeout(() => {
+                    toast.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+                    setTimeout(() => toast.remove(), 300);
+                }, 3500);
+            }
+
+            toggleAdminModal() {
+                if (this.isAdminLoggedIn) {
+                    this.openAdminDashboardControls();
+                } else {
+                    const input = document.getElementById('adminPasswordInput');
+                    if (input) input.value = '';
+                    const err = document.getElementById('loginErrorMsg');
+                    if (err) err.classList.add('hidden');
+                    
+                    document.getElementById('adminLoginModal').classList.remove('hidden');
+                    document.getElementById('adminLoginModal').classList.add('flex');
+                }
+            }
+
+            openAdminDashboardControls() {
+                const modalHtml = `
+                    <div id="adminControlsModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+                        <div class="bg-[#161619] border border-[#2A2A30] rounded-2xl w-full max-w-md p-6 minecraft-shadow relative animate-in fade-in zoom-in duration-200">
+                            <button onclick="app.closeModals()" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
+                                <i class="fa-solid fa-xmark text-lg"></i>
+                            </button>
+                            <div class="flex items-center space-x-3 mb-6">
+                                <div class="w-10 h-10 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-purple-400">
+                                    <i class="fa-solid fa-shield-halved text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="pixel-font text-xs text-white">DASHBOARD ADMIN</h3>
+                                    <p class="text-xs text-gray-400">Benvenuto, ${this.adminName}</p>
+                                </div>
+                            </div>
+                            <div class="space-y-3">
+                                <button onclick="app.openAddModal()" class="w-full flex items-center justify-between bg-purple-600 hover:bg-purple-700 text-white p-3.5 rounded-xl text-xs font-semibold transition-all shadow-lg shadow-purple-600/20">
+                                    <span class="flex items-center space-x-3">
+                                        <i class="fa-solid fa-plus-circle text-base"></i>
+                                        <span>Aggiungi Nuova Sanzione</span>
+                                    </span>
+                                    <i class="fa-solid fa-chevron-right text-xs"></i>
+                                </button>
+                                <button onclick="app.openRevokeModal()" class="w-full flex items-center justify-between bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-500/30 p-3.5 rounded-xl text-xs font-semibold transition-all">
+                                    <span class="flex items-center space-x-3">
+                                        <i class="fa-solid fa-trash-can text-base"></i>
+                                        <span>Elimina / Revoca Sanzione Attiva</span>
+                                    </span>
+                                    <i class="fa-solid fa-chevron-right text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                const existing = document.getElementById('adminControlsModal');
+                if (existing) existing.remove();
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+            }
+
+            handleAdminLogin(e) {
+                e.preventDefault();
+                const pwd = document.getElementById('adminPasswordInput').value;
+                const errDiv = document.getElementById('loginErrorMsg');
+                if (pwd === 'admin123') {
+                    this.isAdminLoggedIn = true;
+                    sessionStorage.setItem('lmcraft1_is_admin', 'true');
+                    sessionStorage.setItem('lmcraft1_admin_name', 'AdminMaster');
+                    this.adminName = 'AdminMaster';
+                    this.closeModals();
+                    this.updateAdminUI();
+                    this.showToast('Autenticazione effettuata con successo!');
+                    this.openAdminDashboardControls();
+                } else {
+                    errDiv.textContent = 'Password errata!';
+                    errDiv.classList.remove('hidden');
+                }
+            }
+
+            adminLogout() {
+                this.isAdminLoggedIn = false;
+                sessionStorage.removeItem('lmcraft1_is_admin');
+                sessionStorage.removeItem('lmcraft1_admin_name');
+                this.updateAdminUI();
+                this.showToast('Logout effettuato con successo.', 'info');
+                this.render();
+            }
+
+            updateAdminUI() {
+                const badge = document.getElementById('adminStatusBadge');
+                const logoutBtn = document.getElementById('adminLogoutBtn');
+                const navBtn = document.getElementById('adminNavBtn');
+                
+                if (this.isAdminLoggedIn) {
+                    badge.classList.remove('hidden');
+                    badge.classList.add('flex');
+                    document.getElementById('adminNameDisplay').textContent = this.adminName;
+                    logoutBtn.classList.remove('hidden');
+                    navBtn.innerHTML = '<i class="fa-solid fa-screwdriver-wrench"></i><span class="hidden sm:inline">Gestisci Server</span>';
+                } else {
+                    badge.classList.add('hidden');
+                    badge.classList.remove('flex');
+                    logoutBtn.classList.add('hidden');
+                    navBtn.innerHTML = '<i class="fa-solid fa-shield-halved"></i><span class="hidden sm:inline">Dashboard Admin</span>';
+                }
+            }
+
+            closeModals() {
+                document.getElementById('adminLoginModal').classList.add('hidden');
+                document.getElementById('adminLoginModal').classList.remove('flex');
+                document.getElementById('addSanctionModal').classList.add('hidden');
+                document.getElementById('addSanctionModal').classList.remove('flex');
+                document.getElementById('revokeSanctionModal').classList.add('hidden');
+                document.getElementById('revokeSanctionModal').classList.remove('flex');
+                const controls = document.getElementById('adminControlsModal');
+                if (controls) controls.remove();
+            }
+
+            openAddModal() {
+                this.closeModals();
+                document.getElementById('newStaffer').value = this.adminName;
+                document.getElementById('newSanctionType').value = 'BAN';
+                this.onSanctionTypeChange();
+                document.getElementById('addSanctionModal').classList.remove('hidden');
+                document.getElementById('addSanctionModal').classList.add('flex');
+            }
+
+            openRevokeModal() {
+                this.closeModals();
+                const select = document.getElementById('revokeSanctionSelect');
+                select.innerHTML = '';
+                const activeSanctions = this.sanctions.filter(s => s.active);
+                if (activeSanctions.length === 0) {
+                    select.innerHTML = '<option value="">Nessuna sanzione attiva disponibile</option>';
+                } else {
+                    activeSanctions.forEach(s => {
+                        const opt = document.createElement('option');
+                        opt.value = s.id;
+                        opt.textContent = `#${s.id} - ${s.player} (${s.type}: ${s.reason.substring(0, 30)}...)`;
+                        select.appendChild(opt);
+                    });
+                }
+                document.getElementById('revokeSanctionModal').classList.remove('hidden');
+                document.getElementById('revokeSanctionModal').classList.add('flex');
+            }
+
+            onSanctionTypeChange() {
+                const type = document.getElementById('newSanctionType').value;
+                const durationInput = document.getElementById('newDuration');
+                if (type === 'BAN') durationInput.value = 'Permanent';
+                else if (type === 'MUTE') durationInput.value = '7 days';
+                else if (type === 'WARN') durationInput.value = '24 hours';
+            }
+
+            handleAddSanction(e) {
+                e.preventDefault();
+                const player = document.getElementById('newPlayerName').value.trim();
+                const type = document.getElementById('newSanctionType').value;
+                const duration = document.getElementById('newDuration').value.trim();
+                const lobby = 'SMP'; // Fixed exclusively to SMP
+                const staffer = document.getElementById('newStaffer').value.trim();
+                const reason = document.getElementById('newReason').value.trim();
+
+                const newId = this.sanctions.length > 0 ? Math.max(...this.sanctions.map(s => s.id)) + 1 : 1001;
+                const now = new Date();
+                const dateStr = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}, ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+                
+                const existingPlayer = this.sanctions.find(s => s.player.toLowerCase() === player.toLowerCase());
+                const uuid = existingPlayer ? existingPlayer.uuid : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+                    const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+                    return v.toString(16);
+                });
+
+                const newSanction = {
+                    id: newId,
+                    player,
+                    uuid,
+                    type,
+                    reason,
+                    date: dateStr,
+                    duration,
+                    lobby,
+                    staffer,
+                    active: true
+                };
+
+                this.sanctions.unshift(newSanction);
+                this.saveData();
+                this.closeModals();
+                this.showToast(`Sanzione #${newId} applicata con successo a ${player}!`);
+                this.render();
+            }
+
+            handleRevokeSanction(e) {
+                e.preventDefault();
+                const sanctionId = parseInt(document.getElementById('revokeSanctionSelect').value);
+                const revokeReason = document.getElementById('revokeReason').value.trim();
+
+                const sanction = this.sanctions.find(s => s.id === sanctionId);
+                if (sanction) {
+                    sanction.active = false;
+                    sanction.reason += ` [REVOCATA: ${revokeReason}]`;
+                    this.saveData();
+                    this.closeModals();
+                    this.showToast(`Sanzione #${sanctionId} revocata con successo!`);
+                    this.render();
+                }
+            }
+
+            filterLog(type) {
+                this.activeFilter = type;
+                this.render();
+            }
+
+            handleSearchInput(val) {
+                this.searchQuery = val.trim().toLowerCase();
+                this.renderTableContent();
+            }
+
+            viewPlayerProfile(playerName) {
+                this.currentView = 'profile';
+                this.selectedPlayerName = playerName;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                this.render();
+            }
+
+            goHome() {
+                this.currentView = 'home';
+                this.selectedPlayerName = null;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                this.render();
+            }
+
+            render() {
+                this.updateAdminUI();
+                const container = document.getElementById('appView');
+                if (this.currentView === 'home') {
+                    container.innerHTML = this.getHomeHtml();
+                } else if (this.currentView === 'profile') {
+                    container.innerHTML = this.getProfileHtml(this.selectedPlayerName);
+                }
+            }
+
+            getHomeHtml() {
+                const totalBans = this.sanctions.filter(s => s.type === 'BAN').length;
+                const totalMutes = this.sanctions.filter(s => s.type === 'MUTE').length;
+
+                return `
+                    <!-- BANNER SUPERIORE LMCRAFT1 -->
+                    <div class="relative bg-gradient-to-r from-purple-900 via-purple-800 to-indigo-900 rounded-2xl p-6 sm:p-8 mb-6 minecraft-shadow border border-purple-500/30 overflow-hidden">
+                        <div class="absolute inset-0 opacity-10 pointer-events-none flex items-center justify-around">
+                            <i class="fa-solid fa-gavel text-6xl text-white transform -rotate-12"></i>
+                            <i class="fa-solid fa-clock text-6xl text-white transform rotate-12"></i>
+                            <i class="fa-solid fa-ban text-6xl text-white transform -rotate-45"></i>
+                            <i class="fa-solid fa-shield text-6xl text-white transform rotate-45"></i>
+                        </div>
+
+                        <div class="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-6">
+                            <div class="text-center sm:text-left">
+                                <div class="inline-flex items-center space-x-2 bg-purple-950/60 border border-purple-500/40 px-3 py-1 rounded-full text-xs text-purple-300 mb-3">
+                                    <i class="fa-solid fa-server"></i>
+                                    <span>LMCraft1 Network Moderation</span>
+                                </div>
+                                <h2 class="pixel-font text-lg sm:text-2xl text-white tracking-wide mb-2 drop-shadow-md">SANCTIONS LOG</h2>
+                                <p class="text-xs sm:text-sm text-purple-200 max-w-xl">
+                                    Database pubblico ufficiale dei provvedimenti disciplinari del network LMCraft1 (Server SMP).
+                                </p>
+                            </div>
+
+                            <div class="flex items-center space-x-4 bg-[#0D0D0D]/60 backdrop-blur border border-purple-500/40 p-4 rounded-2xl minecraft-shadow">
+                                <div class="relative w-16 h-16 sm:w-20 sm:h-20 bg-purple-700/30 rounded-xl border-2 border-purple-500/50 flex items-center justify-center overflow-hidden">
+                                    <img src="https://minotar.net/avatar/Notch/100.png" alt="Judge Minecraft" class="w-full h-full object-cover pixelated" onerror="this.src='https://placehold.co/100x100/3b82f6/ffffff?text=Judge'">
+                                    <div class="absolute bottom-0 right-0 bg-purple-600 text-[9px] px-1 font-bold rounded-tl text-white">JUDGE</div>
+                                </div>
+                                <div>
+                                    <p class="pixel-font text-[10px] text-purple-300">STAFF MODERATION</p>
+                                    <p class="text-sm font-bold text-white">Gavel Bot v2</p>
+                                    <p class="text-[11px] text-purple-300 flex items-center space-x-1 mt-1">
+                                        <i class="fa-solid fa-shield-halved text-xs"></i>
+                                        <span>Sistema Attivo (SMP)</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FILTRI E RICERCA -->
+                    <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 mb-6">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button onclick="app.filterLog('ALL')" class="flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all ${this.activeFilter === 'ALL' ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30 border border-purple-400' : 'bg-[#161619] hover:bg-[#202025] text-gray-300 border border-[#2A2A30]'}">
+                                <i class="fa-solid fa-list"></i>
+                                <span>Tutti (${this.sanctions.length})</span>
+                            </button>
+                            <button onclick="app.filterLog('BANS')" class="flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all ${this.activeFilter === 'BANS' ? 'bg-red-600 text-white shadow-lg shadow-red-600/30 border border-red-400' : 'bg-[#161619] hover:bg-[#202025] text-red-400 border border-[#2A2A30]'}">
+                                <i class="fa-solid fa-ban"></i>
+                                <span>Bans (${totalBans})</span>
+                            </button>
+                            <button onclick="app.filterLog('MUTES')" class="flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all ${this.activeFilter === 'MUTES' ? 'bg-amber-600 text-white shadow-lg shadow-amber-600/30 border border-amber-400' : 'bg-[#161619] hover:bg-[#202025] text-amber-400 border border-[#2A2A30]'}">
+                                <i class="fa-solid fa-microphone-slash"></i>
+                                <span>Mutes (${totalMutes})</span>
+                            </button>
+                        </div>
+
+                        <div class="flex items-center space-x-2">
+                            <div class="relative flex-grow sm:w-80">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                                    <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                                </span>
+                                <input type="text" id="searchInput" oninput="app.handleSearchInput(this.value)" value="${this.searchQuery}" placeholder="Cerca ID, nome giocatore..."
+                                    class="w-full bg-[#161619] border border-[#2A2A30] rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 transition-colors">
+                            </div>
+                            <button onclick="app.handleSearchInput(document.getElementById('searchInput').value)" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-md shadow-purple-600/20 active:scale-95">
+                                SEARCH
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- TABELLA SANZIONI -->
+                    <div class="bg-[#161619] border border-[#2A2A30] rounded-2xl minecraft-shadow overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-[#121215] border-b border-[#2A2A30] text-[11px] font-semibold text-gray-400 tracking-wider">
+                                        <th class="py-3.5 px-4"># ID</th>
+                                        <th class="py-3.5 px-4">PLAYER</th>
+                                        <th class="py-3.5 px-4">REASON</th>
+                                        <th class="py-3.5 px-4">DATE</th>
+                                        <th class="py-3.5 px-4">DURATION</th>
+                                        <th class="py-3.5 px-4 text-right">LOBBY / STAFF</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="sanctionsTableBody" class="divide-y divide-[#2A2A30]/50 text-xs">
+                                    ${this.renderTableRows()}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderTableRows() {
+                let filtered = this.sanctions;
+
+                if (this.activeFilter === 'BANS') {
+                    filtered = filtered.filter(s => s.type === 'BAN');
+                } else if (this.activeFilter === 'MUTES') {
+                    filtered = filtered.filter(s => s.type === 'MUTE');
+                }
+
+                if (this.searchQuery) {
+                    filtered = filtered.filter(s => 
+                        s.player.toLowerCase().includes(this.searchQuery) || 
+                        s.id.toString().includes(this.searchQuery) ||
+                        s.reason.toLowerCase().includes(this.searchQuery)
+                    );
+                }
+
+                if (filtered.length === 0) {
+                    return `
+                        <tr>
+                            <td colspan="6" class="py-12 text-center text-gray-500">
+                                <div class="flex flex-col items-center justify-center space-y-2">
+                                    <i class="fa-solid fa-folder-open text-3xl text-gray-600"></i>
+                                    <p class="text-sm font-medium text-gray-400">Nessuna sanzione trovata.</p>
+                                    <p class="text-xs text-gray-500">Accedi come Administrator per aggiungere nuove sanzioni per LMCraft1 (Lobby SMP).</p>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }
+
+                return filtered.map(s => {
+                    const badgeColor = s.type === 'BAN' ? 'bg-red-500/10 text-red-400 border-red-500/30' :
+                                       s.type === 'MUTE' ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' :
+                                       'bg-purple-500/10 text-purple-400 border-purple-500/30';
+
+                    const durationDisplay = s.duration.toLowerCase() === 'permanent' ? 
+                        `<span class="text-red-400 font-semibold uppercase tracking-wider bg-red-950/40 px-2 py-0.5 rounded border border-red-800/40">Permanent</span>` :
+                        `<span class="text-gray-200">${s.duration}</span>`;
+
+                    return `
+                        <tr class="hover:bg-[#1c1c21] transition-colors group">
+                            <td class="py-3 px-4 font-mono text-purple-400 font-semibold">#${s.id}</td>
+                            <td class="py-3 px-4">
+                                <button onclick="app.viewPlayerProfile('${s.player}')" class="flex items-center space-x-2.5 text-left group-hover:text-purple-400 transition-colors">
+                                    <img src="https://minotar.net/avatar/${s.player}/32.png" alt="${s.player}" class="w-7 h-7 rounded bg-gray-800 border border-[#2A2A30] pixelated" onerror="this.src='https://placehold.co/32x32/3b82f6/ffffff?text=U'">
+                                    <span class="font-medium text-white group-hover:underline">${s.player}</span>
+                                </button>
+                            </td>
+                            <td class="py-3 px-4">
+                                <div class="flex items-center space-x-2">
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold border ${badgeColor}">${s.type}</span>
+                                    <span class="text-gray-300 truncate max-w-xs" title="${s.reason}">${s.reason}</span>
+                                    ${!s.active ? '<span class="text-[10px] bg-gray-800 text-gray-400 px-1.5 py-0.5 rounded">REVOCATA</span>' : ''}
+                                </div>
+                            </td>
+                            <td class="py-3 px-4 text-gray-400 whitespace-nowrap">${s.date}</td>
+                            <td class="py-3 px-4 whitespace-nowrap">${durationDisplay}</td>
+                            <td class="py-3 px-4 text-right">
+                                <div class="text-[11px] text-gray-300 font-medium">${s.lobby}</div>
+                                <div class="text-[10px] text-gray-500">by ${s.staffer}</div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            renderTableContent() {
+                const tbody = document.getElementById('sanctionsTableBody');
+                if (tbody) {
+                    tbody.innerHTML = this.renderTableRows();
+                }
+            }
+
+            getProfileHtml(playerName) {
+                const playerSanctions = this.sanctions.filter(s => s.player.toLowerCase() === playerName.toLowerCase());
+                const playerUuid = playerSanctions.length > 0 ? playerSanctions[0].uuid : '00000000-0000-0000-0000-000000000000';
+                
+                const totalBans = playerSanctions.filter(s => s.type === 'BAN').length;
+                const totalMutes = playerSanctions.filter(s => s.type === 'MUTE').length;
+                const activeBans = playerSanctions.filter(s => s.type === 'BAN' && s.active).length;
+                const activeMutes = playerSanctions.filter(s => s.type === 'MUTE' && s.active).length;
+                const totalActiveSanctions = activeBans + activeMutes;
+
+                return `
+                    <div class="mb-6">
+                        <button onclick="app.goHome()" class="inline-flex items-center space-x-2 bg-[#161619] hover:bg-[#202025] text-gray-300 border border-[#2A2A30] px-4 py-2 rounded-xl text-xs font-semibold transition-all">
+                            <i class="fa-solid fa-arrow-left"></i>
+                            <span>Torna al Log Globale</span>
+                        </button>
+                    </div>
+
+                    <div class="bg-[#161619] border border-[#2A2A30] rounded-2xl p-6 sm:p-8 mb-6 minecraft-shadow relative overflow-hidden">
+                        <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6 relative z-10">
+                            <div class="relative w-24 h-24 sm:w-28 sm:h-28 bg-[#0D0D0D] rounded-2xl border-2 border-purple-500/40 p-2 minecraft-shadow flex items-center justify-center">
+                                <img src="https://minotar.net/helm/${playerName}/150.png" alt="${playerName}" class="w-full h-full object-cover rounded-lg pixelated" onerror="this.src='https://placehold.co/150x150/3b82f6/ffffff?text=${playerName}'">
+                            </div>
+                            <div class="text-center sm:text-left flex-grow">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                                    <h2 class="pixel-font text-lg sm:text-xl text-white">${playerName}</h2>
+                                    <div class="flex items-center justify-center sm:justify-end space-x-2">
+                                        <span class="bg-red-950/60 text-red-400 border border-red-800/50 px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1.5">
+                                            <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                                            <span>${totalActiveSanctions} Active Sanctions</span>
+                                        </span>
+                                        <span class="bg-red-900/30 text-red-300 border border-red-700/40 px-2.5 py-1 rounded-full text-xs">${activeBans} Ban</span>
+                                        <span class="bg-amber-900/30 text-amber-300 border border-amber-700/40 px-2.5 py-1 rounded-full text-xs">${activeMutes} Mute</span>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-gray-400 font-mono mb-4 flex items-center justify-center sm:justify-start space-x-2">
+                                    <i class="fa-solid fa-fingerprint text-purple-400"></i>
+                                    <span>UUID: ${playerUuid}</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                        <div class="bg-[#161619] border border-[#2A2A30] rounded-2xl p-4 minecraft-shadow flex items-center space-x-4">
+                            <div class="w-12 h-12 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-purple-400 text-lg flex-shrink-0">
+                                <i class="fa-solid fa-gavel"></i>
+                            </div>
+                            <div>
+                                <p class="text-[11px] text-gray-400 font-medium">Total Bans</p>
+                                <p class="text-xl font-bold text-white">${totalBans}</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-[#161619] border border-[#2A2A30] rounded-2xl p-4 minecraft-shadow flex items-center space-x-4">
+                            <div class="w-12 h-12 rounded-xl bg-amber-600/20 border border-amber-500/30 flex items-center justify-center text-amber-400 text-lg flex-shrink-0">
+                                <i class="fa-solid fa-microphone-slash"></i>
+                            </div>
+                            <div>
+                                <p class="text-[11px] text-gray-400 font-medium">Total Mutes</p>
+                                <p class="text-xl font-bold text-white">${totalMutes}</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-[#161619] border border-[#2A2A30] rounded-2xl p-4 minecraft-shadow flex items-center space-x-4">
+                            <div class="w-12 h-12 rounded-xl bg-red-600/20 border border-red-500/30 flex items-center justify-center text-red-400 text-lg flex-shrink-0">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                            </div>
+                            <div>
+                                <p class="text-[11px] text-gray-400 font-medium">Active Bans</p>
+                                <p class="text-xl font-bold text-red-400">${activeBans}</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-[#161619] border border-[#2A2A30] rounded-2xl p-4 minecraft-shadow flex items-center space-x-4">
+                            <div class="w-12 h-12 rounded-xl bg-yellow-600/20 border border-yellow-500/30 flex items-center justify-center text-yellow-400 text-lg flex-shrink-0">
+                                <i class="fa-solid fa-comment-slash"></i>
+                            </div>
+                            <div>
+                                <p class="text-[11px] text-gray-400 font-medium">Active Mutes</p>
+                                <p class="text-xl font-bold text-yellow-400">${activeMutes}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-[#161619] border border-[#2A2A30] rounded-2xl p-6 minecraft-shadow">
+                        <h3 class="pixel-font text-xs text-white mb-4 flex items-center space-x-2">
+                            <i class="fa-solid fa-timeline text-purple-400"></i>
+                            <span>CRONOLOGIA PROVVEDIMENTI (${playerName})</span>
+                        </h3>
+                        <div class="space-y-3">
+                            ${playerSanctions.length === 0 ? '<p class="text-gray-500 text-xs py-4 text-center">Nessun provvedimento registrato per questo utente.</p>' : 
+                            playerSanctions.map(s => {
+                                const badgeColor = s.type === 'BAN' ? 'bg-red-500/10 text-red-400 border-red-500/30' :
+                                                   s.type === 'MUTE' ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' :
+                                                   'bg-purple-500/10 text-purple-400 border-purple-500/30';
+
+                                return `
+                                    <div class="bg-[#0D0D0D] border border-[#2A2A30] rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                        <div class="flex items-start space-x-3">
+                                            <div class="mt-0.5">
+                                                <span class="px-2.5 py-1 rounded text-[10px] font-bold border ${badgeColor}">${s.type}</span>
+                                            </div>
+                                            <div>
+                                                <div class="flex items-center space-x-2">
+                                                    <span class="font-mono text-purple-400 text-xs">#${s.id}</span>
+                                                    <span class="text-gray-200 text-sm font-medium">${s.reason}</span>
+                                                </div>
+                                                <div class="flex flex-wrap items-center gap-3 text-xs text-gray-400 mt-1">
+                                                    <span><i class="fa-solid fa-calendar mr-1"></i>${s.date}</span>
+                                                    <span><i class="fa-solid fa-gamepad mr-1 text-purple-400"></i>on ${s.lobby}</span>
+                                                    <span><i class="fa-solid fa-user-shield mr-1"></i>Staff: ${s.staffer}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="text-right flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto">
+                                            <div class="text-xs font-semibold">
+                                                ${s.duration.toLowerCase() === 'permanent' ? '<span class="text-red-400 bg-red-950/50 px-2 py-0.5 rounded border border-red-800/40">Permanent</span>' : `<span class="text-gray-300">${s.duration}</span>`}
+                                            </div>
+                                            <div class="text-[10px] mt-1 ${s.active ? 'text-emerald-400 font-semibold' : 'text-gray-500'}">
+                                                ${s.active ? '● ATTIVO' : '○ SCADUTO/REVOCATO'}
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize App instance
+        const app = new SanctionsApp();
+        window.onload = function() {
+            app.render();
+        }
+    </script>
+</body>
+</html>
